@@ -776,7 +776,7 @@
 
   <script>
     // ── EMAIL SUBMIT (stores to localStorage as fallback; swap for your backend)
-    function handleSubmit(inputId, successId) {
+    async function handleSubmit(inputId, successId) {
       const input = document.getElementById(inputId);
       const success = document.getElementById(successId);
       const email = input.value.trim();
@@ -788,15 +788,22 @@
         return;
       }
 
-      // ── Swap this block for your real backend call ──
-      const existing = JSON.parse(localStorage.getItem('aperta_emails') || '[]');
-      if (!existing.includes(email)) existing.push(email);
-      localStorage.setItem('aperta_emails', JSON.stringify(existing));
-      // ───────────────────────────────────────────────
-
-      input.closest('.form-row').style.display = 'none';
-      success.style.display = 'block';
+    try {
+      const res = await fetch('https://formspree.io/f/xvzwkvnd', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      if (res.ok) {
+        input.closest('.form-row').style.display = 'none';
+        success.style.display = 'block';
+      } else {
+        alert('Something went wrong — please try again.');
+      }
+    } catch {
+      alert('Connection error — please try again.');
     }
+  }
 
     // Allow Enter key to submit
     document.querySelectorAll('input[type="email"]').forEach(input => {
