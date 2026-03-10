@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Notice — Aperta by Cyncerity</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&family=Instrument+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink: #1a1714;
+      --ink-faint: #4a4540;
+      --paper: #f5f0e8;
+      --paper-warm: #ede8dc;
+      --amber: #c8873a;
+      --rule: rgba(26,23,20,0.12);
+    }
+
+    body {
+      background-color: var(--paper);
+      color: var(--ink);
+      font-family: 'Instrument Sans', sans-serif;
+      font-weight: 300;
+      line-height: 1.75;
+      padding: 0;
+    }
+
+    nav {
+      padding: 1.8rem 4rem;
+      border-bottom: 1px solid var(--rule);
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--ink);
+      text-decoration: none;
+    }
+
+    .nav-logo span { font-weight: 300; font-style: italic; color: var(--amber); }
+    .nav-sep { color: var(--rule); font-size: 1.2rem; }
+
+    .nav-crumb {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+    }
+
+    .page-wrap {
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 5rem 2rem 8rem;
+    }
+
+    .page-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 1.5rem;
+    }
+
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.2rem, 4vw, 3.2rem);
+      font-weight: 300;
+      line-height: 1.1;
+      margin-bottom: 0.8rem;
+    }
+
+    .last-updated {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      color: var(--ink-faint);
+      margin-bottom: 3.5rem;
+      padding-bottom: 3rem;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .notice-intro {
+      font-size: 1.05rem;
+      color: var(--ink-faint);
+      line-height: 1.8;
+      margin-bottom: 4rem;
+      padding: 1.8rem 2rem;
+      border-left: 3px solid var(--amber);
+      background: rgba(200,135,58,0.06);
+    }
+
+    h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: var(--ink);
+      margin-top: 3.5rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    h2 .section-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      color: var(--amber);
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 0.3rem;
+    }
+
+    p {
+      font-size: 0.95rem;
+      color: var(--ink-faint);
+      margin-bottom: 1rem;
+    }
+
+    ul {
+      list-style: none;
+      margin: 1rem 0 1.5rem;
+      padding: 0;
+    }
+
+    ul li {
+      font-size: 0.95rem;
+      color: var(--ink-faint);
+      padding: 0.5rem 0 0.5rem 1.5rem;
+      border-bottom: 1px solid var(--rule);
+      position: relative;
+    }
+
+    ul li::before {
+      content: '–';
+      position: absolute;
+      left: 0;
+      color: var(--amber);
+      font-family: 'DM Mono', monospace;
+    }
+
+    .highlight-box {
+      margin: 1.5rem 0;
+      padding: 1.4rem 1.8rem;
+      border: 1px solid var(--rule);
+      background: var(--paper-warm);
+    }
+
+    .highlight-box p { margin: 0; font-size: 0.9rem; }
+
+    .contact-block {
+      margin-top: 4rem;
+      padding: 2.5rem;
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .contact-block h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem;
+      font-weight: 300;
+      color: var(--paper);
+      margin-bottom: 1rem;
+    }
+
+    .contact-block p { color: rgba(245,240,232,0.65); margin-bottom: 0.5rem; }
+
+    .contact-block a {
+      color: var(--amber);
+      text-decoration: none;
+    }
+
+    .rights-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border: 1px solid var(--rule);
+      margin: 1.5rem 0;
+    }
+
+    .right-item {
+      padding: 1.2rem 1.5rem;
+      border-right: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .right-item:nth-child(even) { border-right: none; }
+    .right-item:nth-last-child(-n+2) { border-bottom: none; }
+
+    .right-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 0.3rem;
+    }
+
+    .right-desc {
+      font-size: 0.85rem;
+      color: var(--ink-faint);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    footer {
+      margin-top: 5rem;
+      padding: 2rem 0;
+      border-top: 1px solid var(--rule);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    footer a {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--amber);
+      text-decoration: none;
+    }
+
+    footer span {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.62rem;
+      color: var(--ink-faint);
+      letter-spacing: 0.1em;
+    }
+
+    @media (max-width: 640px) {
+      nav { padding: 1.4rem 1.5rem; }
+      .page-wrap { padding: 3rem 1.5rem 5rem; }
+      .rights-grid { grid-template-columns: 1fr; }
+      .right-item { border-right: none; }
+      .right-item:nth-last-child(-n+2) { border-bottom: 1px solid var(--rule); }
+      .right-item:last-child { border-bottom: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-logo">Aperta<span>°</span></a>
+    <span class="nav-sep">/</span>
+    <span class="nav-crumb">Privacy Notice</span>
+  </nav>
+
+  <div class="page-wrap">
+
+    <div class="page-eyebrow">Legal — GDPR compliant</div>
+    <h1>Privacy Notice</h1>
+    <p class="last-updated">Last updated: March 2026 &nbsp;·&nbsp; Version 1.0</p>
+
+    <div class="notice-intro">
+      This notice is written plainly, not to obscure. Aperta is a product built on the belief that communication should be clear and honest — this document reflects that. We tell you exactly what we collect, why, and what you can do about it.
+    </div>
+
+
+    <h2><span class="section-num">01</span>Who we are</h2>
+    <p>Aperta is a product developed and operated by <strong>Cyncerity</strong>, a company based in Milan, Italy. We are the data controller for any personal data collected through this website and the Aperta beta programme.</p>
+    <div class="highlight-box">
+      <p><strong>Data Controller:</strong> Cyncerity, Milan, Italy<br/>
+      <strong>Contact:</strong> <a href="mailto:pierstefano.bellani@gmail.com" style="color:var(--amber);">pierstefano.bellani@gmail.com</a></p>
+    </div>
+
+
+    <h2><span class="section-num">02</span>What data we collect and why</h2>
+    <p>We collect only what is necessary. At this stage — the beta waiting list — we collect one category of personal data:</p>
+    <ul>
+      <li><strong>Email address</strong> — provided voluntarily when you sign up to the beta waiting list. Used solely to notify you when your beta access is ready and to send relevant product updates during the beta period.</li>
+    </ul>
+    <p>When you use Aperta to analyse a message, the text of that message is processed by an AI model to generate the analysis. Please note:</p>
+    <ul>
+      <li>In the free tier, message text is sent to <strong>Groq's API servers</strong> for AI inference. Groq is a US-based service. By using Aperta, you acknowledge this processing.</li>
+      <li>We do not store your message text on our own systems. We do not link message content to your email address.</li>
+      <li>We do not use your message content for any purpose other than returning the analysis to you in the moment.</li>
+    </ul>
+
+
+    <h2><span class="section-num">03</span>Legal basis for processing (GDPR Article 6)</h2>
+    <p>We process your data under the following legal bases:</p>
+    <ul>
+      <li><strong>Consent (Art. 6(1)(a))</strong> — when you submit your email address to join the waiting list, you are giving explicit consent for us to contact you about Aperta beta access and product updates. You can withdraw this consent at any time.</li>
+      <li><strong>Legitimate interest (Art. 6(1)(f))</strong> — for anonymous usage analytics (page views, button interactions) used to understand product performance, where this does not override your interests or fundamental rights.</li>
+    </ul>
+
+
+    <h2><span class="section-num">04</span>Who we share your data with</h2>
+    <p>We do not sell your data. We do not share your email address with third parties for marketing. The only data sharing that occurs is:</p>
+    <ul>
+      <li><strong>Email delivery service</strong> — if and when we send you a beta invitation, we use an email service provider to deliver it. We will update this notice with the specific provider before doing so.</li>
+      <li><strong>Groq API (message analysis only)</strong> — when you use Aperta to analyse a message, that text is sent to Groq's inference API. Groq's privacy policy applies to that processing: <a href="https://groq.com/privacy-policy/" style="color:var(--amber);" target="_blank" rel="noopener">groq.com/privacy-policy</a>. Message text is not linked to your email.</li>
+    </ul>
+
+
+    <h2><span class="section-num">05</span>International transfers</h2>
+    <p>Groq operates servers in the United States. When your message text is sent to Groq for analysis, this constitutes a transfer of data outside the European Economic Area (EEA). Groq participates in frameworks designed to provide adequate protection for such transfers. For the current status of these safeguards, please refer to Groq's privacy policy.</p>
+    <p>Your email address is stored within the EEA, or in a jurisdiction with an adequacy decision, unless you are notified otherwise.</p>
+
+
+    <h2><span class="section-num">06</span>How long we keep your data</h2>
+    <ul>
+      <li><strong>Waiting list email addresses</strong> — retained until (a) you unsubscribe, (b) we contact you with beta access and you either join or decline, or (c) we determine the beta programme will not proceed, at which point all emails will be deleted within 30 days.</li>
+      <li><strong>Message text</strong> — not retained by us at all. Groq's own data retention policies apply to their processing.</li>
+    </ul>
+
+
+    <h2><span class="section-num">07</span>Your rights under GDPR</h2>
+    <p>You have the following rights regarding your personal data. To exercise any of them, contact us at the address below.</p>
+
+    <div class="rights-grid">
+      <div class="right-item">
+        <div class="right-title">Access</div>
+        <p class="right-desc">Request a copy of the personal data we hold about you.</p>
+      </div>
+      <div class="right-item">
+        <div class="right-title">Erasure</div>
+        <p class="right-desc">Request deletion of your personal data at any time, without reason.</p>
+      </div>
+      <div class="right-item">
+        <div class="right-title">Rectification</div>
+        <p class="right-desc">Ask us to correct inaccurate data we hold about you.</p>
+      </div>
+      <div class="right-item">
+        <div class="right-title">Portability</div>
+        <p class="right-desc">Receive your data in a structured, machine-readable format.</p>
+      </div>
+      <div class="right-item">
+        <div class="right-title">Withdraw consent</div>
+        <p class="right-desc">Withdraw your consent to processing at any time. This does not affect prior lawful processing.</p>
+      </div>
+      <div class="right-item">
+        <div class="right-title">Object</div>
+        <p class="right-desc">Object to processing based on legitimate interest where your interests override ours.</p>
+      </div>
+    </div>
+
+    <p>You also have the right to lodge a complaint with your national data protection authority. In Italy, this is the <strong>Garante per la protezione dei dati personali</strong> (<a href="https://www.garanteprivacy.it" style="color:var(--amber);" target="_blank" rel="noopener">garanteprivacy.it</a>).</p>
+
+
+    <h2><span class="section-num">08</span>Cookies and tracking</h2>
+    <p>This website does not use tracking cookies or third-party analytics at this stage. If this changes, we will update this notice and, where required by law, ask for your consent.</p>
+
+
+    <h2><span class="section-num">09</span>Changes to this notice</h2>
+    <p>We will update this notice as the product evolves — particularly when we introduce email delivery services, additional AI providers, or user accounts. The 'Last updated' date at the top reflects the most recent revision. We will notify waiting-list subscribers of material changes by email.</p>
+
+
+    <div class="contact-block">
+      <h3>Questions or requests</h3>
+      <p>To exercise your rights, request deletion of your data, or ask any question about how we handle your information:</p>
+      <p><a href="mailto:pierstefano.bellani@gmail.com">pierstefano.bellani@gmail.com</a></p>
+      <p style="margin-top:1rem;">We will respond to all requests within <strong style="color:var(--paper);">30 days</strong>, in line with GDPR requirements.</p>
+    </div>
+
+    <footer>
+      <a href="index.html">← Back to Aperta</a>
+      <span>© 2026 Cyncerity · Milan, Italy</span>
+    </footer>
+
+  </div>
+</body>
+</html>
