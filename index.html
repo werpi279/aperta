@@ -3,177 +3,829 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Aperta — Say what you mean</title>
+  <title>Aperta — Understood, the first time</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&family=Instrument+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink: #1a1714;
+      --ink-faint: #4a4540;
+      --paper: #f5f0e8;
+      --paper-warm: #ede8dc;
+      --amber: #c8873a;
+      --amber-light: #e8a85a;
+      --amber-pale: #f7e8d4;
+      --sage: #7a8c7e;
+      --rule: rgba(26,23,20,0.12);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--paper);
+      color: var(--ink);
+      font-family: 'Instrument Sans', sans-serif;
+      font-weight: 300;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* -─ NOISE TEXTURE OVERLAY -─ */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.5;
+    }
+
+    /* -─ NAV -─ */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 1.5rem 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(to bottom, var(--paper) 60%, transparent);
+    }
+
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--ink);
+      text-decoration: none;
+    }
+
+    .nav-logo span {
+      font-weight: 300;
+      font-style: italic;
+      color: var(--amber);
+      margin-left: 0.15em;
+    }
+
+    .nav-hint {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--ink-faint);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    /* -─ HERO -─ */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-left {
+      padding: 12rem 4rem 6rem 6rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 2.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .hero-eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 2rem;
+      height: 1px;
+      background: var(--amber);
+    }
+
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3rem, 5vw, 5.5rem);
+      font-weight: 300;
+      line-height: 1.05;
+      color: var(--ink);
+      margin-bottom: 2rem;
+    }
+
+    h1 em {
+      font-style: italic;
+      color: var(--amber);
+    }
+
+    .hero-sub {
+      font-size: 1.05rem;
+      font-weight: 300;
+      color: var(--ink-faint);
+      line-height: 1.7;
+      max-width: 38ch;
+      margin-bottom: 3.5rem;
+    }
+
+    /* -─ EMAIL FORM -─ */
+    .form-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      max-width: 400px;
+      position: relative;
+    }
+
+    .form-row {
+      display: flex;
+      border: 1px solid var(--ink);
+      background: var(--paper);
+      overflow: hidden;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .form-row:focus-within {
+      box-shadow: 4px 4px 0 var(--amber);
+    }
+
+    .form-row input[type="email"] {
+      flex: 1;
+      padding: 1rem 1.2rem;
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 300;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--ink);
+    }
+
+    .form-row input::placeholder {
+      color: rgba(26,23,20,0.35);
+    }
+
+    .form-row button {
+      padding: 1rem 1.4rem;
+      background: var(--ink);
+      color: var(--paper);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .form-row button:hover { background: var(--amber); }
+
+    .form-note {
+      margin-top: 1rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--ink-faint);
+      letter-spacing: 0.08em;
+    }
+
+    .success-msg {
+      display: none;
+      padding: 1rem 1.2rem;
+      border: 1px solid var(--amber);
+      background: var(--amber-pale);
+      font-size: 0.88rem;
+      color: var(--amber);
+      font-style: italic;
+    }
+
+    /* -─ HERO RIGHT — APERTURE -─ */
+    .hero-right {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .aperture-bg {
+      position: absolute;
+      inset: 0;
+      background: var(--paper-warm);
+    }
+
+    .aperture-wrap {
+      position: relative;
+      width: 420px;
+      height: 420px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .aperture-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid var(--rule);
+      animation: breathe 6s ease-in-out infinite;
+    }
+
+    .aperture-ring:nth-child(1) { width: 420px; height: 420px; animation-delay: 0s; }
+    .aperture-ring:nth-child(2) { width: 320px; height: 320px; animation-delay: 0.5s; border-color: rgba(200,135,58,0.2); }
+    .aperture-ring:nth-child(3) { width: 220px; height: 220px; animation-delay: 1s; border-color: rgba(200,135,58,0.35); }
+
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.04); opacity: 0.7; }
+    }
+
+    .aperture-center {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 40% 40%, var(--amber-light), var(--amber));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 20px 60px rgba(200,135,58,0.3), 0 4px 20px rgba(200,135,58,0.2);
+      animation: pulse-glow 4s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 20px 60px rgba(200,135,58,0.3), 0 4px 20px rgba(200,135,58,0.2); }
+      50% { box-shadow: 0 30px 80px rgba(200,135,58,0.5), 0 8px 30px rgba(200,135,58,0.3); }
+    }
+
+    .aperture-icon {
+      font-size: 2.8rem;
+      user-select: none;
+    }
+
+    .floating-tag {
+      position: absolute;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      padding: 0.4rem 0.8rem;
+      animation: float 5s ease-in-out infinite;
+    }
+
+    .floating-tag:nth-child(5) { top: 18%; right: 12%; animation-delay: 0s; }
+    .floating-tag:nth-child(6) { top: 55%; right: 5%; animation-delay: 1.2s; }
+    .floating-tag:nth-child(7) { bottom: 22%; left: 10%; animation-delay: 0.8s; }
+    .floating-tag:nth-child(8) { top: 28%; left: 5%; animation-delay: 2s; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    /* -─ DIVIDER -─ */
+    .rule-section {
+      padding: 0 6rem;
+      border-top: 1px solid var(--rule);
+    }
+
+    /* -─ HOW IT WORKS -─ */
+    .how {
+      padding: 8rem 6rem;
+    }
+
+    .section-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 4rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--rule);
+    }
+
+    .how-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+    }
+
+    .how-item {
+      padding: 3rem;
+      border-right: 1px solid var(--rule);
+      position: relative;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .how-item.visible { opacity: 1; transform: translateY(0); }
+    .how-item:nth-child(2) { transition-delay: 0.15s; }
+    .how-item:nth-child(3) { border-right: none; transition-delay: 0.3s; }
+
+    .how-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 4rem;
+      font-weight: 300;
+      color: var(--rule);
+      line-height: 1;
+      margin-bottom: 1.5rem;
+    }
+
+    .how-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem;
+      font-weight: 400;
+      margin-bottom: 1rem;
+      color: var(--ink);
+    }
+
+    .how-body {
+      font-size: 0.92rem;
+      color: var(--ink-faint);
+      line-height: 1.75;
+    }
+
+    /* -─ NOT SECTION -─ */
+    .not-section {
+      padding: 8rem 6rem;
+      background: var(--ink);
+      color: var(--paper);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .not-section::before {
+      content: 'APERTA';
+      position: absolute;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22vw;
+      font-weight: 600;
+      color: rgba(255,255,255,0.03);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      white-space: nowrap;
+      letter-spacing: -0.03em;
+      pointer-events: none;
+    }
+
+    .not-section .section-label { color: var(--amber-light); }
+    .not-section .section-label::after { background: rgba(255,255,255,0.1); }
+
+    .not-quote {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.8rem, 3.5vw, 3rem);
+      font-weight: 300;
+      line-height: 1.3;
+      max-width: 36ch;
+      color: var(--paper);
+      margin-bottom: 4rem;
+    }
+
+    .not-quote em {
+      font-style: italic;
+      color: var(--amber-light);
+    }
+
+    .not-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .not-item {
+      padding: 2rem 2.5rem;
+      border-right: 1px solid rgba(255,255,255,0.1);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .not-item:nth-child(even) { border-right: none; }
+    .not-item:nth-child(3), .not-item:nth-child(4) { border-bottom: none; }
+
+    .not-item-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .not-item.is { color: var(--amber-light); }
+    .not-item.is .not-item-label { color: var(--amber-light); }
+    .not-item.not { color: rgba(245,240,232,0.45); }
+    .not-item.not .not-item-label { color: rgba(245,240,232,0.3); }
+    .not-item.not .not-item-text { text-decoration: line-through; text-decoration-color: rgba(245,240,232,0.2); }
+
+    .not-item-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.25rem;
+      font-weight: 400;
+      line-height: 1.3;
+    }
+
+    /* -─ PHILOSOPHY -─ */
+    .philosophy {
+      padding: 10rem 6rem;
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 8rem;
+      align-items: center;
+    }
+
+    .phil-left .section-label { margin-bottom: 2rem; }
+
+    .phil-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 3vw, 3.2rem);
+      font-weight: 300;
+      line-height: 1.2;
+      color: var(--ink);
+    }
+
+    .phil-heading em { font-style: italic; color: var(--amber); }
+
+    .phil-right {
+      padding: 3rem;
+      border: 1px solid var(--rule);
+      position: relative;
+    }
+
+    .phil-right::before {
+      content: '"';
+      position: absolute;
+      top: -1.5rem;
+      left: 2rem;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 8rem;
+      color: var(--amber);
+      line-height: 1;
+    }
+
+    .phil-quote {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.35rem;
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.6;
+      color: var(--ink);
+      margin-bottom: 1.5rem;
+    }
+
+    .phil-attr {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+    }
+
+    /* -─ SECOND CTA -─ */
+    .cta-section {
+      padding: 8rem 6rem;
+      background: var(--amber-pale);
+      border-top: 1px solid rgba(200,135,58,0.2);
+      border-bottom: 1px solid rgba(200,135,58,0.2);
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 6rem;
+      align-items: center;
+    }
+
+    .cta-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.2rem, 3.5vw, 3.8rem);
+      font-weight: 300;
+      line-height: 1.1;
+      color: var(--ink);
+    }
+
+    .cta-heading em { font-style: italic; color: var(--amber); }
+
+    .cta-sub {
+      margin-top: 1.5rem;
+      font-size: 0.92rem;
+      color: var(--ink-faint);
+      line-height: 1.7;
+    }
+
+    /* -─ FOOTER -─ */
+    footer {
+      padding: 3rem 6rem;
+      border-top: 1px solid var(--rule);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-brand {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem;
+      font-weight: 400;
+    }
+
+    .footer-brand small {
+      display: block;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      margin-top: 0.2rem;
+    }
+
+    .footer-note {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.62rem;
+      color: var(--ink-faint);
+      letter-spacing: 0.1em;
+      text-align: right;
+    }
+
+    /* -─ ENTRANCE ANIMATION -─ */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(28px);
+      animation: fadeUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    .fade-up:nth-child(1) { animation-delay: 0.1s; }
+    .fade-up:nth-child(2) { animation-delay: 0.25s; }
+    .fade-up:nth-child(3) { animation-delay: 0.4s; }
+    .fade-up:nth-child(4) { animation-delay: 0.55s; }
+
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* -─ RESPONSIVE -─ */
+    @media (max-width: 900px) {
+      nav { padding: 1.2rem 2rem; }
+      .hero { grid-template-columns: 1fr; min-height: auto; }
+      .hero-left { padding: 9rem 2rem 4rem; }
+      .hero-right { height: 50vw; min-height: 280px; }
+      .aperture-wrap { width: 260px; height: 260px; }
+      .aperture-ring:nth-child(1) { width: 260px; height: 260px; }
+      .aperture-ring:nth-child(2) { width: 190px; height: 190px; }
+      .aperture-ring:nth-child(3) { width: 130px; height: 130px; }
+      .aperture-center { width: 80px; height: 80px; }
+      .aperture-icon { font-size: 1.8rem; }
+      .floating-tag { display: none; }
+      .how { padding: 5rem 2rem; }
+      .how-grid { grid-template-columns: 1fr; }
+      .how-item { border-right: none; border-bottom: 1px solid var(--rule); padding: 2.5rem 0; }
+      .how-item:last-child { border-bottom: none; }
+      .rule-section { padding: 0 2rem; }
+      .not-section { padding: 5rem 2rem; }
+      .not-list { grid-template-columns: 1fr; }
+      .not-item { border-right: none; }
+      .not-item:nth-child(3) { border-bottom: 1px solid rgba(255,255,255,0.1); }
+      .philosophy { padding: 5rem 2rem; grid-template-columns: 1fr; gap: 3rem; }
+      .cta-section { padding: 5rem 2rem; grid-template-columns: 1fr; gap: 3rem; }
+      footer { padding: 2.5rem 2rem; flex-direction: column; gap: 1.5rem; text-align: center; }
+      .footer-note { text-align: center; }
+    }
+  </style>
 </head>
 <body>
 
-  <!-- Header -->
-  <header id="header">
-    <div class="header-inner">
-      <div class="logo">Aperta<span class="logo-mark">°</span></div>
-      <div class="tagline">by Cyncerity</div>
-    </div>
-  </header>
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo">Aperta<span>°</span></a>
+    <span class="nav-hint">by Cyncerity</span>
+  </nav>
 
-  <!-- Main layout: input left, results right -->
-  <main id="main">
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-left">
+      <div class="hero-eyebrow fade-up">Early access — beta</div>
 
-    <!-- LEFT: Input panel -->
-    <section id="input-panel">
+      <h1 class="fade-up">
+        You know what<br/>you mean.<br/><em>Will they?</em>
+      </h1>
 
-      <div class="input-label">Your message</div>
+      <p class="hero-sub fade-up">
+        You write clearly. You mean well. But every message crosses a gap —
+        your context, your assumptions, your unspoken obvious — landing in someone
+        else's world entirely. Aperta catches what might be misread, before it is.
+      </p>
 
-      <!-- Paste warning popup -->
-      <div id="paste-warning" class="paste-warning hidden">
-        <div class="paste-warning-inner">
-          <span class="paste-warning-icon">◈</span>
-          <span class="paste-warning-text">Typing directly helps Aperta understand you better — it can see how you think as you write</span>
-          <button id="paste-warning-close" class="paste-warning-close" aria-label="Dismiss">✕</button>
+      <div class="form-wrapper fade-up">
+        <div class="form-row">
+          <input type="email" id="email-hero" placeholder="your@email.com" autocomplete="email" />
+          <button onclick="handleSubmit('email-hero', 'success-hero')">Join beta</button>
         </div>
-      </div>
-
-      <!-- Main textarea -->
-      <div class="textarea-wrap">
-        <textarea
-          id="message-input"
-          class="message-input"
-          placeholder="Write your message here..."
-          spellcheck="true"
-          rows="10"
-        ></textarea>
-        <div id="char-count" class="char-count">0 words</div>
-      </div>
-
-      <!-- Context field -->
-      <div id="context-section">
-        <button id="context-toggle" class="context-toggle">
-          <span id="context-toggle-icon">+</span>
-          Add context
-        </button>
-        <div id="context-field" class="context-field hidden">
-          <div class="context-label">Help me understand better — paste the email, message or page you're responding to</div>
-          <textarea
-            id="context-input"
-            class="context-input"
-            placeholder="Paste email, message, document..."
-            rows="5"
-          ></textarea>
+        <div class="success-msg" id="success-hero">
+          You're on the list. We'll be in touch when your spot opens.
         </div>
-      </div>
-
-      <!-- Analyse button -->
-      <div class="action-row">
-        <button id="analyse-btn" class="analyse-btn" disabled>
-          <span id="analyse-btn-text">Write something to analyse</span>
-          <span id="analyse-countdown" class="analyse-countdown hidden"></span>
-        </button>
-        <div id="send-asis" class="send-asis hidden">
-          <button id="copy-original-btn" class="copy-btn">Copy as written</button>
-        </div>
-      </div>
-
-    </section>
-
-    <!-- RIGHT: Results panel -->
-    <section id="results-panel" class="hidden">
-
-      <!-- Loading state -->
-      <div id="results-loading" class="results-loading hidden">
-        <div class="spinner"></div>
-        <div class="loading-text">Aperta is reading between the lines...</div>
-      </div>
-
-      <!-- Analysis results -->
-      <div id="results-content" class="hidden">
-
-        <!-- Clarity score -->
-        <div id="clarity-block" class="clarity-block">
-          <div id="clarity-score" class="clarity-score">0</div>
-          <div class="clarity-label">clarity score</div>
-        </div>
-
-        <!-- Emotion banner -->
-        <div id="emotion-banner" class="emotion-banner">
-          <div id="emotion-primary" class="emotion-primary"></div>
-          <div id="emotion-explain" class="emotion-explain"></div>
-        </div>
-
-        <!-- Needs block -->
-        <div id="needs-block" class="needs-block hidden">
-          <div class="needs-label">What you may actually need</div>
-          <div id="needs-text" class="needs-text"></div>
-        </div>
-
-        <!-- Meta question (conditional) -->
-        <div id="meta-question-block" class="meta-question-block hidden">
-          <div class="meta-question-label">Before we start</div>
-          <div class="meta-question-text">What response are you hoping to get from this message?</div>
-          <textarea id="meta-question-answer" class="meta-question-answer" placeholder="Your answer (optional)..." rows="2"></textarea>
-        </div>
-
-        <!-- Annotated message -->
-        <div class="result-section">
-          <div class="result-section-title">
-            Your message
-            <div class="ann-legend">
-              <span class="legend-item"><span class="legend-dot blue"></span>inner</span>
-              <span class="legend-item"><span class="legend-dot amber"></span>missing</span>
-              <span class="legend-item"><span class="legend-dot red"></span>perception</span>
-            </div>
-          </div>
-          <div id="annotated-message" class="annotated-message"></div>
-          <div class="annotation-hint">Click highlighted words to answer Aperta's questions</div>
-        </div>
-
-        <!-- Refine button — appears after first answer -->
-        <div id="refine-block" class="refine-block hidden">
-          <div id="refine-answers-summary" class="refine-answers-summary"></div>
-          <button id="refine-btn" class="refine-btn">
-            Refine with my answers ◎
-          </button>
-        </div>
-
-        <!-- Rewrite section -->
-        <div id="rewrite-section" class="result-section hidden">
-          <div class="result-section-title">
-            Suggested rewrite
-            <button id="toggle-diff-btn" class="toggle-diff-btn">Show changes</button>
-          </div>
-          <div id="rewrite-clean" class="rewrite-clean"></div>
-          <div id="rewrite-diff" class="rewrite-diff hidden"></div>
-          <div id="change-log" class="change-log hidden"></div>
-          <div class="rewrite-actions">
-            <button id="copy-rewrite-btn" class="copy-btn copy-btn-primary">Copy rewrite</button>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-  </main>
-
-  <!-- Anchored popup for coaching questions -->
-  <div id="coaching-popup" class="coaching-popup hidden">
-    <div class="coaching-popup-inner">
-      <div id="coaching-phrase" class="coaching-phrase"></div>
-      <div id="coaching-question" class="coaching-question"></div>
-      <div id="coaching-reason" class="coaching-reason"></div>
-      <textarea id="coaching-answer" class="coaching-answer" placeholder="Your answer..." rows="3"></textarea>
-      <div class="coaching-popup-actions">
-        <button id="coaching-cancel" class="coaching-cancel">Cancel</button>
-        <button id="coaching-apply" class="coaching-apply">Apply ◈</button>
+        <p class="form-note">No spam. No noise. Just Aperta, when it's ready.</p>
+        <p class="form-note" style="margin-top:0.6rem;">By joining you agree to our <a href="privacy.html" style="color:var(--amber); text-underline-offset:3px;">Privacy Notice</a>. We store your email to contact you about beta access only.</p>
       </div>
     </div>
-    <div class="coaching-popup-arrow"></div>
+
+    <div class="hero-right">
+      <div class="aperture-bg"></div>
+      <div class="aperture-wrap">
+        <div class="aperture-ring"></div>
+        <div class="aperture-ring"></div>
+        <div class="aperture-ring"></div>
+        <div class="aperture-center">
+          <span class="aperture-icon">◎</span>
+        </div>
+        <div class="floating-tag">reader may assume</div>
+        <div class="floating-tag">clarity score · 74</div>
+        <div class="floating-tag">context gap detected →</div>
+        <div class="floating-tag">could read as urgent</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <div class="rule-section">
+    <section class="how">
+      <div class="section-label">How it works</div>
+      <div class="how-grid">
+        <div class="how-item">
+          <div class="how-num">01</div>
+          <div class="how-title">Write as you normally would</div>
+          <p class="how-body">Type your message directly into Aperta. No special instructions. No format to follow. Your voice, your words — exactly as you'd send them. Aperta reads along, silently.</p>
+        </div>
+        <div class="how-item">
+          <div class="how-num">02</div>
+          <div class="how-title">See it through their eyes</div>
+          <p class="how-body">Aperta shows you the phrases your reader might interpret differently — context you've assumed, gaps they'll fill in on their own, and questions that could generate a reply you weren't expecting. Not what you meant wrong. What they might read differently.</p>
+        </div>
+        <div class="how-item">
+          <div class="how-num">03</div>
+          <div class="how-title">Close the gap, keep your voice</div>
+          <p class="how-body">Answer a few targeted questions. Aperta produces one refined version — still you, still your message — with the ambiguities resolved before they become a thread of twelve follow-ups. Send it or keep the original. Always your call.</p>
+        </div>
+      </div>
+    </section>
   </div>
 
-  <!-- Overlay for popup -->
-  <div id="popup-overlay" class="popup-overlay hidden"></div>
+  <!-- NOT SECTION -->
+  <section class="not-section">
+    <div class="section-label">The real problem</div>
+    <p class="not-quote">
+      The problem is rarely<br/>
+      what you <em>said.</em><br/>
+      It's what they <em>heard.</em>
+    </p>
+    <div class="not-list">
+      <div class="not-item is">
+        <div class="not-item-label">Communication is hard because</div>
+        <div class="not-item-text">Your reader has different context, history, and assumptions</div>
+      </div>
+      <div class="not-item not">
+        <div class="not-item-label">Not because</div>
+        <div class="not-item-text">You wrote it wrong</div>
+      </div>
+      <div class="not-item is">
+        <div class="not-item-label">Aperta spots</div>
+        <div class="not-item-text">The gap between what you meant and what lands</div>
+      </div>
+      <div class="not-item not">
+        <div class="not-item-label">Not</div>
+        <div class="not-item-text">Your grammar or your tone</div>
+      </div>
+    </div>
+  </section>
 
-  <script src="app.js"></script>
+  <!-- PHILOSOPHY -->
+  <section class="philosophy">
+    <div class="phil-left">
+      <div class="section-label">The name</div>
+      <h2 class="phil-heading">
+        From the universal<br/>language — <em>open.</em>
+      </h2>
+      <p style="margin-top:1.5rem; font-size:0.92rem; color:var(--ink-faint); line-height:1.75; max-width:38ch;">
+        Aperta is Esperanto for <em>open</em>. Esperanto was built to remove barriers between people — not to change who they are, but to let them be understood. An aperture lets light through unchanged. That is what Aperta does to your message.
+      </p>
+    </div>
+    <div class="phil-right">
+      <blockquote class="phil-quote">
+        I open myself knowing that when you clearly see through me you could hurt me —
+        but I run the risk, hoping you won't.
+        Because we need to cooperate, not compete.
+      </blockquote>
+      <div class="phil-attr">— The philosophy behind Aperta, Cyncerity founders</div>
+    </div>
+  </section>
+
+  <!-- SECOND CTA -->
+  <section class="cta-section">
+    <div>
+      <h2 class="cta-heading">Stop losing hours to<br/><em>messages about messages.</em></h2>
+      <p class="cta-sub">
+        Every misread message costs a follow-up, an explanation, sometimes a relationship.
+        Aperta is in private beta. Early testers get free access and shape what it becomes.
+      </p>
+    </div>
+    <div>
+      <div class="form-wrapper">
+        <div class="form-row">
+          <input type="email" id="email-cta" placeholder="your@email.com" autocomplete="email" />
+          <button onclick="handleSubmit('email-cta', 'success-cta')">Request access</button>
+        </div>
+        <div class="success-msg" id="success-cta">
+          You're on the list. We'll be in touch when your spot opens.
+        </div>
+        <p class="form-note">No spam. No noise. Just Aperta, when it's ready.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-brand">
+      Aperta
+      <small>A product by Cyncerity · Milan, Italy</small>
+    </div>
+    <div class="footer-note">
+      © 2026 Cyncerity<br/>
+      <a href="privacy.html" style="color:var(--amber); text-decoration:none; font-family:'DM Mono',monospace; font-size:0.62rem; letter-spacing:0.1em;">Privacy Notice</a>
+      &nbsp;·&nbsp; Early access — beta programme
+    </div>
+  </footer>
+
+  <script>
+    // - EMAIL SUBMIT (stores to localStorage as fallback; swap for your backend)
+    async function handleSubmit(inputId, successId) {
+      const input = document.getElementById(inputId);
+      const success = document.getElementById(successId);
+      const email = input.value.trim();
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        input.style.outline = '2px solid #c8873a';
+        input.focus();
+        setTimeout(() => input.style.outline = '', 1500);
+        return;
+      }
+
+    try {
+      const res = await fetch('https://formspree.io/f/xvzwkvnd', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      if (res.ok) {
+        input.closest('.form-row').style.display = 'none';
+        success.style.display = 'block';
+      } else {
+        alert('Something went wrong — please try again.');
+      }
+    } catch {
+      alert('Connection error — please try again.');
+    }
+  }
+
+    // Allow Enter key to submit
+    document.querySelectorAll('input[type="email"]').forEach(input => {
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          const btn = input.closest('.form-row').querySelector('button');
+          btn.click();
+        }
+      });
+    });
+
+    // - Intersection observer for scroll reveals
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.how-item').forEach(el => observer.observe(el));
+  </script>
 </body>
 </html>
