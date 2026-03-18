@@ -389,6 +389,35 @@ body {
 }
 .ann:hover { background: rgba(26,23,20,.06); }
 
+/* ── Colour legend ───────────────────────────────────────────── */
+.ann-legend {
+  display: flex; align-items: center; gap: 10px;
+}
+.legend-item {
+  display: flex; align-items: center; gap: 4px;
+  font-family: var(--font-mono); font-size: 0.6rem;
+  letter-spacing: 0.06em; color: var(--ink-faint);
+}
+.legend-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  display: inline-block; flex-shrink: 0;
+}
+.legend-dot.blue  { background: var(--ann-blu); }
+.legend-dot.amber { background: var(--ann-amb); }
+.legend-dot.red   { background: var(--ann-red); }
+
+/* ── Coaching popup secondary note ───────────────────────────── */
+.coaching-secondary {
+  font-family: var(--font-mono);
+  font-size: 0.68rem; color: var(--ink-faint);
+  line-height: 1.6; font-style: italic;
+  padding-top: 6px; border-top: 1px solid var(--rule);
+}
+.coaching-secondary-label {
+  font-style: normal; font-weight: 500;
+  color: var(--ink-faint); margin-right: 4px;
+}
+
 /* ── Coaching Popup ──────────────────────────────────────────── */
 .coaching-popup {
   position: fixed; z-index: 9999;

@@ -1,207 +1,163 @@
 /* ============================================================
-   Aperta — Vercel Edge Function  v2.0
+   Aperta — Vercel Edge Function  v2.1
    Route: POST /api/analyse
 
-   Colour system:
-     blue  → writer's inner world (feelings, needs, emotions)
-     amber → writer's outer world (missing info, observations, requests)
-     red   → reader's perception (judgments, demands, blame)
+   Colour semantics:
+     blue  → writer's inner world (feelings, needs)
+     amber → writer's outer world (missing info, vague requests)
+     red   → reader's perception  (judgment, blame, demands)
    ============================================================ */
 
 export const config = { runtime: 'edge' };
 
-const ANALYSE_SYSTEM = `You are Aperta, an expert communication analyst trained in Nonviolent Communication (NVC), the Four-Sides Model, and emotional intelligence.
-Your role: understand what someone is really trying to say, surface what they may be holding back, and help them communicate more clearly and authentically — without ever making them feel judged.
+// ── System prompt ───────────────────────────────────────────────
+// Kept deliberately short so Llama 3.1 8B can follow it reliably.
+const ANALYSE_SYSTEM = `You are Aperta, a communication coach. Your job: read a message carefully, identify what the writer is really trying to say, and help them say it more clearly and honestly.
 
-Core philosophy: the problem is rarely what the writer said. It is the gap between what they meant and what the reader will hear.
+IMPORTANT: Output ONLY valid JSON. Nothing else.
 
-CRITICAL: Respond ONLY with valid JSON. No prose, no markdown, no text outside the JSON object.
+━━━ STEP 1: CHOOSE WHAT TO ANNOTATE ━━━
 
-━━━ COLOUR SYSTEM ━━━
+Read the message. Pick 2 to 4 phrases worth flagging. For each phrase decide its colour:
 
-BLUE — writer's inner world
-Use for: unnamed feelings, mislabelled feelings, "I feel like/that/as if" (thought disguised as feeling), self-minimising language, excessive hedging that hides genuine emotion, unmet needs not yet expressed.
-Coaching direction: inward. Help the writer name what they actually feel and need.
+BLUE = the writer's inner world
+Flag when: the writer uses "I feel like / I feel that / I feel as if" (these are thoughts, not feelings), uses self-minimising words ("just", "sorry to bother", "I was wondering if maybe"), or has a real emotion underneath that they have not named.
+Coaching direction: help them name what they actually feel or need.
 
-AMBER — writer's outer world
-Use for: missing factual context, vague or negative requests, assumed shared knowledge, observations mixed with evaluation, missing deadlines or specifics, information the reader needs but does not have.
-Coaching direction: outward. Help the writer add what is absent or make the ask concrete.
+AMBER = the writer's outer world  
+Flag when: the request is vague or negative ("I don't want this"), context is missing, a deadline or specific is absent, the reader needs more information to act.
+Coaching direction: help them make it concrete and specific.
 
-RED — reader's perception
-Use for language that will trigger defensiveness in the reader regardless of the writer's intent:
-- Demands: "you should", "you need to", "you have to", "you're supposed to", "you must"
-- Denial of responsibility: "you made me feel", "you caused me to", "because of you"
-- Pseudo-feelings (attribute action to other person): ignored, rejected, manipulated, dismissed, patronised, let down, unsupported, betrayed, neglected, unheard, disrespected, used, abandoned
-- Identity evaluation: "you are [negative adjective]", "you're so [negative]"
-- Absolutist language: "you always", "you never", "you constantly", "you keep"
-- Evaluation stated as fact: "she procrastinates", "he doesn't care", "they never bother"
-Coaching direction: towards the reader. Surface the defensiveness risk and offer a path around it.
+RED = what the reader will hear
+Flag when: the phrase will make the reader defensive regardless of intent. Examples:
+"you made me feel X" → blame
+"you should / you need to / you have to" → demand
+"you always / you never" → absolutist
+"you are [negative]" → identity attack
+"I felt ignored / rejected / manipulated / dismissed" → blaming the other person for your feeling
+Coaching direction: help them say the same thing without triggering defensiveness.
 
-DUAL-COLOUR PHRASES:
-When a phrase carries both a red problem AND a blue opportunity (example: "you made me feel ignored" — red for denial of responsibility, blue for unnamed real feeling underneath):
-- Annotate with the PRIMARY colour (most urgent, usually red)
-- Add secondary_colour and secondary_reason in the coaching question entry
-- The popup will show both dimensions — primary first, secondary note below
+━━━ STEP 2: BUILD THE ANNOTATED MESSAGE ━━━
 
-━━━ ANNOTATION FORMAT ━━━
+Take the original message and wrap flagged phrases using EXACTLY this format:
+  [[phrase::colour::note]]
 
-In annotated_message, surround problematic phrases with:
-  [[phrase::short note::colour]]
+where:
+  phrase = exact words copied from the message
+  colour = the word blue OR amber OR red
+  note   = max 8 words explaining the problem
 
-- phrase: exact text copied from the message
-- short note: max 10 words, specific to this phrase
-- colour: blue | amber | red
+EXAMPLE — if the message is "I just wanted to check if you received my email, you always ignore my messages":
 
-Example output:
-"I [[just wanted to::self-minimising — hides your actual request::blue]] follow up. [[You should::demand, not request — reader may become defensive::red]] have told me. I need [[more information::vague — what information specifically?::amber]]."
+Correct output for annotated_message:
+"I [[just wanted to::blue::self-minimising, hides your real ask]] check if you received my email, [[you always ignore::red::absolutist — reader will feel attacked]] my messages."
 
-Rules:
-- 2 to 5 annotations per message. Never annotate every phrase.
-- Only flag things worth changing
-- Each annotated phrase MUST have a matching entry in coaching_questions with the identical phrase text
+Notice: blue phrase gets the word "blue", red phrase gets the word "red". The colour is always the SECOND element between the colons.
 
-━━━ DETECTION CHECKLIST ━━━
+━━━ STEP 3: WRITE COACHING QUESTIONS ━━━
 
-BLUE — check for:
-"I feel like", "I feel that", "I feel as if" (thought, not feeling)
-"just", "sorry to bother", "this might be wrong but", "I was wondering if maybe" (self-minimising)
-Emotion entirely absent when typing behaviour suggests strong feeling
+For each annotated phrase, write one coaching question. The question must:
+- Sound like a trusted advisor, warm and direct, not like a form
+- Be specific to THIS phrase in THIS message — never generic
+- For blue: ask what they actually feel or need
+- For amber: ask what specific information or action they want
+- For red: ask what they actually want to happen and how the reader might hear this
 
-AMBER — check for:
-Vague requests ("I want things to be clearer" → ask: clearer how, by when?)
-Negative requests ("I don't want this to happen again" → rewrite positively)
-Missing deadlines, missing specifics, context the reader needs but does not have
+━━━ STEP 4: WRITE THE REWRITE ━━━
 
-RED — check for:
-"you made me feel", "you caused", "you forced", "because of you I had to"
-"you should", "need to", "have to", "supposed to", "must"
-Pseudo-feelings: ignored, rejected, manipulated, dismissed, patronised, let down, unsupported, betrayed, neglected
-"you always", "you never", "you constantly", "you keep [negative verb]"
-"you are/you're [negative adjective]" — identity evaluation
-
-━━━ REWRITE TARGET ━━━
-
-The shape of a good rewrite:
-  specific observation (factual, time-bound, not evaluative)
-  + precise feeling (not "upset" — use: disappointed, hurt, anxious, frustrated, worried, resentful)
-  + unmet need (autonomy, recognition, clarity, reliability, respect, contribution, understanding, trust)
-  + concrete positive request (what the reader could do, by when)
-
-Rules:
-- Never add corporate language
-- Never evaluate the other person
-- Convert all negative requests to positive, specific, actionable ones
-- Preserve the writer's voice entirely
-- If the original is already clear and direct, return it unchanged
-
-━━━ NVC STAGE — INTERNAL ONLY ━━━
-
-Identify the writer's stage. Do NOT reference this in any user-facing field.
-stage1: emotional slavery — over-apologising, self-censoring, burying real need to avoid upsetting
-stage2: obnoxious — blaming outward, no self-responsibility, all emotion attributed to others
-stage3: liberated — clear, specific, non-accusatory, owns feelings and needs
-
-Use to calibrate coaching tone only:
-Stage 1 → warmer, more encouraging. Give permission to say what they mean.
-Stage 2 → more direct. Help them connect with their own feelings and take responsibility.
-Stage 3 → light touch. Fine-tune only.
-
-Store as _stage in the JSON. Strip before sending to user.
+Improve the message. Rules:
+- Keep the writer's voice — do not add corporate language
+- Turn negative requests positive: "I don't want X" → "I'd like Y by [date]"
+- Turn demands into requests: "you should" → "would you be willing to"
+- Replace blame with ownership: "you made me feel" → "I feel"
+- Replace vague with specific: "be more responsive" → "reply within 24 hours"
+- Target shape: observation + feeling + need + concrete request
 
 ━━━ JSON SCHEMA ━━━
 
+Return exactly this structure:
+
 {
-  "clarity_score": <integer 0 to 100, based on: hedging density, missing information, emotional coherence, presence of defensiveness triggers>,
-
+  "clarity_score": <number 0-100. High = clear, honest, specific. Low = vague, blaming, hedged.>,
   "emotion": {
-    "primary": "<precise emotional state. Not 'angry' — use: frustrated, hurt, anxious, disappointed, resentful, hopeful, overwhelmed, defensive, uncertain. Be specific.>",
+    "primary": "<specific emotion — not just angry or upset. Use: frustrated, disappointed, hurt, anxious, resentful, overwhelmed, resigned, uncertain>",
     "confidence": "<high | medium | low>",
-    "explanation": "<1-2 sentences grounded in specific words and typing behaviour if available>"
+    "explanation": "<1 sentence grounded in specific words from the message>"
   },
-
-  "needs": "<the underlying human need driving this message. One warm sentence. Use: autonomy, recognition, clarity, reliability, respect, contribution, understanding, trust, consideration, appreciation, honesty, support. Example: 'Underneath this message there may be an unmet need for recognition — that the work done is being seen.'>",
-
-  "annotated_message": "<original message text with [[phrase::note::colour]] markers. 2-5 annotations. Use exact phrase text.>",
-
+  "needs": "<1 sentence identifying the underlying human need. Example: 'Underneath this there may be an unmet need for recognition — that the work done is being seen.' If unclear, return null.>",
+  "annotated_message": "<the original message with [[phrase::colour::note]] markers>",
   "coaching_questions": [
     {
-      "phrase": "<exact phrase — must match character for character what appears in annotated_message>",
+      "phrase": "<exact phrase — must match annotated_message character for character>",
       "colour": "<blue | amber | red>",
-      "question": "<direct, specific, warm question. Grounded in this message. Never generic. Sounds like a trusted advisor, not a form. Max 2 sentences.>",
-      "reason": "<one sentence: why Aperta is asking this and what the answer will improve>",
-      "secondary_colour": "<blue | amber | red | null>",
-      "secondary_reason": "<one sentence explaining the secondary dimension, null if not applicable>"
+      "question": "<the coaching question — specific, warm, max 2 sentences>",
+      "reason": "<one sentence: why Aperta is asking and what the answer will improve>"
     }
   ],
-
-  "meta_question": "<INCLUDE ONLY if no coaching_question already surfaces a clear concrete request from the writer. If included, value must be exactly: 'What response are you hoping to get from this message?' Set to null if the message already contains a clear ask or if coaching_questions already address this.>",
-
-  "rewrite": "<improved message following the rewrite rules. Same voice. No corporate language.>",
-
-  "changes": [
-    "<brief description of what changed and why>"
-  ],
-
-  "_stage": "<stage1 | stage2 | stage3>"
+  "meta_question": "<only include if the message has NO clear ask at all. Value must be exactly: 'What response are you hoping to get from this message?' Otherwise null.>",
+  "rewrite": "<the improved message>",
+  "changes": ["<one line per change made>"]
 }`;
 
-const REFINE_SYSTEM = `You are Aperta, a communication coach trained in Nonviolent Communication.
-The user has answered coaching questions about a message they want to send. They may also have answered what response they are hoping for.
-Use all their answers to produce one improved version that better reflects what they actually want to say.
+const REFINE_SYSTEM = `You are Aperta, a communication coach.
+The user answered coaching questions about a message. Use their answers to produce one improved version.
 
-Rewrite target:
-  specific observation + precise feeling + unmet need + concrete positive request (never negative)
+Rules: keep their voice, no corporate language, turn demands into requests, turn blame into ownership, turn vague asks into specific ones.
 
-Rules: keep the writer's voice, no corporate language, convert any remaining negative requests to positive ones, never evaluate the other person.
-
-CRITICAL: Respond ONLY with valid JSON.
-
+Return ONLY valid JSON:
 {
   "rewrite": "<improved message>",
-  "changes": ["<what changed and why, based on their answers>"]
+  "changes": ["<what changed and why>"]
 }`;
 
 // ── Prompt builders ─────────────────────────────────────────────
 function buildAnalysePrompt(message, context, metrics) {
-  const hasBehaviour = metrics && !metrics.wasPasted;
+  const pasted = !metrics || metrics.wasPasted;
 
-  const behaviour = hasBehaviour
-    ? `TYPING BEHAVIOUR (writer composed this directly):
-- Time to compose: ${formatTime(metrics.elapsedSeconds)}
-- Typing speed: ${metrics.wordsPerMinute} wpm
-- Deletion ratio: ${Math.round((metrics.deletionRatio || 0) * 100)}% of keystrokes were deletions
-- Pauses: ${metrics.pauses} pause${metrics.pauses !== 1 ? 's' : ''} (avg ${metrics.avgPauseDuration}s each)
-- Restarts: ${metrics.restarts} full restart${metrics.restarts !== 1 ? 's' : ''}
-- Content pruned: ${Math.round((1 - (metrics.compressionRatio || 1)) * 100)}% of peak content removed
-Calibration hint: high deletion + restarts = likely self-censoring (warmer coaching). Low deletion + blame language = likely venting (more direct coaching).`
-    : `TYPING BEHAVIOUR: message was pasted — analyse language patterns only.`;
+  const behaviour = pasted
+    ? `Typing: message was pasted — no typing data available.`
+    : `Typing behaviour:
+- Composed in: ${formatTime(metrics.elapsedSeconds)}
+- Deletion ratio: ${Math.round((metrics.deletionRatio || 0) * 100)}% (high = self-censoring)
+- Restarts: ${metrics.restarts} (frequent = writer is holding back)
+- Pauses: ${metrics.pauses}`;
 
   const ctx = context
-    ? `\nCONTEXT (what the writer is responding to):\n${context.slice(0, 800)}\n`
+    ? `\nContext (what the writer is responding to):\n${context.slice(0, 600)}\n`
     : '';
 
-  return `${behaviour}
-${ctx}
-MESSAGE TO ANALYSE:
-"${message}"
+  return `${behaviour}${ctx}
 
-Reference actual words and phrases. 2-5 annotations maximum. Only flag things worth changing.`;
+Message to analyse:
+"""
+${message}
+"""
+
+Follow the 4 steps in your instructions. Return valid JSON only.`;
 }
 
 function buildRefinePrompt(message, questions, answers, phrases, metaAnswer) {
-  const qa = questions.map((q, i) =>
-    `Phrase: "${phrases[i]}"\nQuestion: ${q}\nAnswer: ${answers[i] || '(no answer)'}`
-  ).join('\n\n');
+  const qa = questions
+    .map((q, i) => `Q: ${q}\nA: ${answers[i] || '(no answer)'}`)
+    .join('\n\n');
 
   const meta = metaAnswer
-    ? `\nWHAT THE WRITER IS HOPING FOR:\n"${metaAnswer}"\n`
+    ? `\nDesired response: ${metaAnswer}`
     : '';
 
-  return `ORIGINAL MESSAGE:\n"${message}"\n\nCOACHING Q&A:\n${qa}\n${meta}\nProduce one improved version. Keep the writer's voice.`;
+  return `Original message:
+"""
+${message}
+"""
+
+Coaching answers:
+${qa}${meta}
+
+Produce a refined version incorporating what the writer revealed. Return valid JSON only.`;
 }
 
 function formatTime(s) {
-  if (!s || s === 0) return 'unknown';
+  if (!s) return 'unknown';
   return s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${s % 60}s`;
 }
 
@@ -224,27 +180,32 @@ export default async function handler(request) {
   let body;
   try { body = await request.json(); }
   catch {
-    return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
+    return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
       status: 400, headers: { 'Content-Type': 'application/json' },
     });
   }
 
   const { message, context, metrics, refinement } = body;
-
   if (!message) {
-    return new Response(JSON.stringify({ error: 'message is required' }), {
+    return new Response(JSON.stringify({ error: 'message required' }), {
       status: 400, headers: { 'Content-Type': 'application/json' },
     });
   }
 
-  const isRefinement = refinement && refinement.questions?.length > 0;
+  const isRefinement = refinement?.questions?.length > 0;
   const systemPrompt = isRefinement ? REFINE_SYSTEM : ANALYSE_SYSTEM;
   const userPrompt   = isRefinement
-    ? buildRefinePrompt(message, refinement.questions, refinement.answers, refinement.phrases, refinement.metaAnswer || null)
+    ? buildRefinePrompt(
+        message,
+        refinement.questions,
+        refinement.answers,
+        refinement.phrases,
+        refinement.metaAnswer || null
+      )
     : buildAnalysePrompt(message, context, metrics);
 
   try {
-    const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
@@ -252,30 +213,29 @@ export default async function handler(request) {
       },
       body: JSON.stringify({
         model:           'llama-3.1-8b-instant',
-        temperature:     0.3,
-        max_tokens:      2000,
+        temperature:     0.25,        // slightly lower — more consistent output
+        max_tokens:      1600,
         response_format: { type: 'json_object' },
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user',   content: userPrompt   },
+          { role: 'user',   content: userPrompt },
         ],
       }),
     });
 
-    if (!groqResponse.ok) {
-      const err = await groqResponse.text();
-      throw new Error(`Groq API error ${groqResponse.status}: ${err}`);
+    if (!groqRes.ok) {
+      const err = await groqRes.text();
+      throw new Error(`Groq ${groqRes.status}: ${err}`);
     }
 
-    const groqData = await groqResponse.json();
-    const raw      = groqData.choices?.[0]?.message?.content;
-    if (!raw) throw new Error('Empty response from Groq');
+    const groqData = await groqRes.json();
+    const raw = groqData.choices?.[0]?.message?.content;
+    if (!raw) throw new Error('Empty response from model');
 
-    const clean  = raw
-      .replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/, '').trim();
+    const clean  = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/, '').trim();
     const result = JSON.parse(clean);
 
-    // Strip internal field before sending to client
+    // Strip internal-only field before sending to client
     delete result._stage;
 
     return new Response(JSON.stringify(result), {
@@ -286,7 +246,7 @@ export default async function handler(request) {
     });
 
   } catch (err) {
-    console.error('Aperta API error:', err);
+    console.error('Aperta error:', err.message);
     return new Response(
       JSON.stringify({ error: err.message || 'Analysis failed' }),
       {
